@@ -22,10 +22,15 @@ namespace WEBNHASAN.Controllers
             _hosting = hosting;
         }
         //Hiển thị danh sách sản phẩm
-        public IActionResult Index()
+        public IActionResult Index(int? page)
         {
+            var pageIndex = (int)(page != null ? page : 1);
+            var pageSize = 6;
             var productList = _db.Products.Include(x => x.Category).ToList();
-            return View(productList);
+            var pageSum = productList.Count() / pageSize + (productList.Count() % pageSize > 0 ? 1 : 0);
+            ViewBag.PageSum = pageSum;
+            ViewBag.PagIndex = pageIndex;
+            return View(productList.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList());
         }
         //Hiển thị form thêm sản phẩm mới
         public IActionResult Add()
@@ -38,10 +43,10 @@ namespace WEBNHASAN.Controllers
             });
             return View();
         }
-       
+  
 
         //Xử lý thêm sản phẩm
-     
+        [HttpPost]
 public IActionResult Add(Product product, IFormFile ImageUrl)
         {
             if (ModelState.IsValid) //kiem tra hop le
